@@ -12,6 +12,9 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover"
 import { Link } from "react-router"
+import { ModeToggle } from "./modeToggle"
+import { authApi, useLogoutMutation, useUserInfoQuery } from "@/redux/features/auth/authApi"
+import { useAppDispatch } from "@/redux/hooks"
 
 // Navigation links array to be used in both desktop and mobile menus
 const navigationLinks = [
@@ -21,6 +24,14 @@ const navigationLinks = [
 
 
 export default function Navbar() {
+    const { data } = useUserInfoQuery(undefined)
+    const [logout] = useLogoutMutation()
+    const dispatch = useAppDispatch()
+
+    const handleLogout = async () => {
+        await logout(null);
+        dispatch(authApi.util.resetApiState());
+    };
     return (
         <header className="border-b">
             <div className="flex container mx-auto h-16 items-center justify-between gap-4">
@@ -70,7 +81,7 @@ export default function Navbar() {
                                                 asChild
                                                 className="py-1.5"
                                             >
-                                               <Link to={link.href}> {link.label}</Link>
+                                                <Link to={link.href}> {link.label}</Link>
                                             </NavigationMenuLink>
                                         </NavigationMenuItem>
                                     ))}
@@ -89,7 +100,7 @@ export default function Navbar() {
                                 {navigationLinks.map((link, index) => (
                                     <NavigationMenuItem key={index}>
                                         <NavigationMenuLink
-                                           asChild
+                                            asChild
                                             className="text-muted-foreground hover:text-primary py-1.5 font-medium"
                                         >
                                             <Link to={link.href}>{link.label}</Link>
@@ -102,9 +113,21 @@ export default function Navbar() {
                 </div>
                 {/* Right side */}
                 <div className="flex items-center gap-2">
-                    <Button asChild variant="ghost" size="sm" className="text-sm">
-                        <a href="/register">Sign In</a>
-                    </Button>
+                    <ModeToggle />
+                    {data?.data?.email && (
+                        <Button
+                            onClick={handleLogout}
+                            variant="outline"
+                            className="text-sm"
+                        >
+                            Logout
+                        </Button>
+                    )}
+                    {!data?.data?.email && (
+                        <Button asChild className="text-sm text-white">
+                            <Link to="/login">Login</Link>
+                        </Button>
+                    )}
                 </div>
             </div>
         </header>

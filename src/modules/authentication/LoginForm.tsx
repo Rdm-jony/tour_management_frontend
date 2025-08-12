@@ -2,71 +2,48 @@
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
+import { useForm, type FieldValues, type SubmitHandler } from "react-hook-form"
 
-import { z } from "zod"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import Password from "@/components/ui/Password"
-import { useRegisterMutation } from "@/redux/features/auth/authApi"
+import { useLoginMutation } from "@/redux/features/auth/authApi"
 import { toast } from "sonner"
 import { Link, useNavigate } from "react-router"
 
-const registerSchema = z.object({
-    name: z.string().min(3, "password too shoert.Minimum at least 3 charcter long").max(50),
-    email: z.email(),
-    password: z
-        .string("password must be required")
-        .min(8, { message: "Password must be at least 8 characters long." })
-        .regex(/^(?=.*[A-Z])/, {
-            message: "Password must contain at least 1 uppercase letter.",
-        })
-        .regex(/^(?=.*[!@#$%^&*])/, {
-            message: "Password must contain at least 1 special character.",
-        })
-        .regex(/^(?=.*\d)/, {
-            message: "Password must contain at least 1 number.",
-        }),
-    confirmPassword: z.string("confirm password must be required!")
-}).refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-});
+    ;
 
-export function RegisterForm({
+export function LoginForm({
     className,
     ...props
 }: React.HTMLAttributes<HTMLDivElement>) {
     const navigate = useNavigate()
-    const [register] = useRegisterMutation()
-    const form = useForm<z.infer<typeof registerSchema>>({
-        resolver: zodResolver(registerSchema),
+    const [login] = useLoginMutation()
+    const form = useForm({
         defaultValues: {
-            name: "",
             email: "",
             password: "",
-            confirmPassword: ""
+
         },
     })
 
-    async function onSubmit(data: z.infer<typeof registerSchema>) {
-        const userInfo = {
-            name: data.name,
-            email: data.email,
-            password: data.password
-        }
+    const onSubmit: SubmitHandler<FieldValues> = async (data) => {
+
         try {
-            const response = await register(userInfo).unwrap()
-            toast.success(response.data.message)
+            const response = await login(data).unwrap()
+            toast.success(response.message)
+            console.log(response)
             navigate("/")
         } catch (error: any) {
-            toast.error(error.data.message)
+            toast.error(error?.data?.message || "Network error")
+            if (error.status === 401) {
+                navigate("/verify", { state: data.email })
+            }
         }
     }
     return (
         <div className={cn("flex flex-col gap-6", className)} {...props}>
             <div className="flex flex-col items-center gap-2 text-center">
-                <h1 className="text-xl font-bold">Register your account</h1>
+                <h1 className="text-xl font-bold">Login your account</h1>
                 <p className="text-sm text-muted-foreground">
                     Enter your details to create an account
                 </p>
@@ -74,20 +51,7 @@ export function RegisterForm({
             <div className="grid gap-6">
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                        <FormField
-                            control={form.control}
-                            name="name"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Name</FormLabel>
-                                    <FormControl>
-                                        <Input placeholder="jony das" {...field} />
-                                    </FormControl>
 
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
                         <FormField
                             control={form.control}
                             name="email"
@@ -116,20 +80,7 @@ export function RegisterForm({
                                 </FormItem>
                             )}
                         />
-                        <FormField
-                            control={form.control}
-                            name="confirmPassword"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Confirm Password</FormLabel>
-                                    <FormControl>
-                                        <Password {...field} />
-                                    </FormControl>
 
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
                         <Button type="submit" className="w-full">
                             Login
                         </Button>
@@ -150,9 +101,9 @@ export function RegisterForm({
                 </Button>
             </div>
             <div className="text-center text-sm">
-                Already have an account?{" "}
-                <Link to="/login" className="underline underline-offset-4">
-                    Sign in
+                Don&apos;t have an account?{" "}
+                <Link to="/register" className="underline underline-offset-4">
+                    Sign up
                 </Link>
             </div>
         </div>
