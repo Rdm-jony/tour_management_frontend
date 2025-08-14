@@ -11,6 +11,7 @@ import { toast } from "sonner"
 import { Link, useNavigate } from "react-router"
 
     ;
+import envConfig from "@/config/env.confing"
 
 export function LoginForm({
     className,
@@ -94,7 +95,7 @@ export function LoginForm({
                 </div>
                 <Button
                     type="button"
-
+                    onClick={() => window.open(`${envConfig.baseUrl}/auth/google`)}
                     className="w-full cursor-pointer text-white"
                 >
                     Login with Google
