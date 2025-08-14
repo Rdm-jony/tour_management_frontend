@@ -1,4 +1,4 @@
-import Logo from "@/assets/icons/logo"
+import Logo from "@/assets/icons/Logo"
 import { Button } from "@/components/ui/button"
 import {
     NavigationMenu,
@@ -11,17 +11,26 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
+import { Link } from "react-router"
+import { ModeToggle } from "./modeToggle"
+import { authApi, useLogoutMutation, useUserInfoQuery } from "@/redux/features/auth/authApi"
+import { useAppDispatch } from "@/redux/hooks"
 
 // Navigation links array to be used in both desktop and mobile menus
 const navigationLinks = [
-    { href: "#", label: "Home", active: true },
-    { href: "#", label: "Features" },
-    { href: "#", label: "Pricing" },
-    { href: "#", label: "About" },
+    { href: "/", label: "Home", },
+    { href: "/about", label: "About" },
 ]
 
 
 export default function Navbar() {
+    const { data } = useUserInfoQuery(undefined)
+    const [logout] = useLogoutMutation()
+    const dispatch = useAppDispatch()
+    const handleLogout = async () => {
+        await logout(null);
+        dispatch(authApi.util.resetApiState());
+    };
     return (
         <header className="border-b">
             <div className="flex container mx-auto h-16 items-center justify-between gap-4">
@@ -68,11 +77,10 @@ export default function Navbar() {
                                     {navigationLinks.map((link, index) => (
                                         <NavigationMenuItem key={index} className="w-full">
                                             <NavigationMenuLink
-                                                href={link.href}
+                                                asChild
                                                 className="py-1.5"
-                                                active={link.active}
                                             >
-                                                {link.label}
+                                                <Link to={link.href}> {link.label}</Link>
                                             </NavigationMenuLink>
                                         </NavigationMenuItem>
                                     ))}
@@ -91,11 +99,10 @@ export default function Navbar() {
                                 {navigationLinks.map((link, index) => (
                                     <NavigationMenuItem key={index}>
                                         <NavigationMenuLink
-                                            active={link.active}
-                                            href={link.href}
+                                            asChild
                                             className="text-muted-foreground hover:text-primary py-1.5 font-medium"
                                         >
-                                            {link.label}
+                                            <Link to={link.href}>{link.label}</Link>
                                         </NavigationMenuLink>
                                     </NavigationMenuItem>
                                 ))}
@@ -105,12 +112,21 @@ export default function Navbar() {
                 </div>
                 {/* Right side */}
                 <div className="flex items-center gap-2">
-                    <Button asChild variant="ghost" size="sm" className="text-sm">
-                        <a href="#">Sign In</a>
-                    </Button>
-                    <Button asChild size="sm" className="text-sm">
-                        <a href="#">Get Started</a>
-                    </Button>
+                    <ModeToggle />
+                    {data?.email && (
+                        <Button
+                            onClick={handleLogout}
+                            variant="outline"
+                            className="text-sm"
+                        >
+                            Logout
+                        </Button>
+                    )}
+                    {!data?.email && (
+                        <Button asChild className="text-sm text-white">
+                            <Link to="/login">Login</Link>
+                        </Button>
+                    )}
                 </div>
             </div>
         </header>
