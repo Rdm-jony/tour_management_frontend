@@ -1,13 +1,17 @@
 import App from "@/App";
 import Dashboard from "@/layout/DashboardLayout";
-import { generateRoutes } from "@/lib/generateRoutes";
+import { generateRoutes } from "@/utils/generateRoutes";
 import About from "@/pages/About";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
-import Bookings from "@/pages/User/Bookings";
 import Verify from "@/pages/Verify";
 import { createBrowserRouter } from "react-router";
-import { adminSidebarItems } from "./AdminSidebarItems";
+import { userSidebarItems } from "./userSidebarItems";
+import { adminSidebarItems } from "./adminSidebarItems";
+import  { withAuth } from "@/utils/withAuth";
+import { role } from "@/constants/role";
+import type { TRole } from "@/types";
+import Unauthorized from "@/pages/Unauthorized";
 
 export const router = createBrowserRouter([
   {
@@ -34,17 +38,16 @@ export const router = createBrowserRouter([
   },
   {
     path: "/admin",
-    Component: Dashboard,
+    Component: withAuth(Dashboard,role.admin as TRole, role.superAdmin as TRole),
     children:[...generateRoutes(adminSidebarItems)]
   },
   {
     path: "/user",
-    Component: Dashboard,
-    children:[
-      {
-        path:"/user/bookings",
-        Component:Bookings
-      }
-    ]
-  }
+    Component: withAuth(Dashboard,role.user as TRole),
+    children:[...generateRoutes(userSidebarItems)]
+  },
+ {
+  path:"/unauthorized",
+  Component:Unauthorized
+ }
 ]);

@@ -27,7 +27,6 @@ export default function Navbar() {
     const { data } = useUserInfoQuery(undefined)
     const [logout] = useLogoutMutation()
     const dispatch = useAppDispatch()
-
     const handleLogout = async () => {
         await logout(null);
         dispatch(authApi.util.resetApiState());
@@ -114,7 +113,7 @@ export default function Navbar() {
                 {/* Right side */}
                 <div className="flex items-center gap-2">
                     <ModeToggle />
-                    {data?.data?.email && (
+                    {data?.email && (
                         <Button
                             onClick={handleLogout}
                             variant="outline"
@@ -123,7 +122,7 @@ export default function Navbar() {
                             Logout
                         </Button>
                     )}
-                    {!data?.data?.email && (
+                    {!data?.email && (
                         <Button asChild className="text-sm text-white">
                             <Link to="/login">Login</Link>
                         </Button>

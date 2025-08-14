@@ -11,20 +11,23 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
-import { adminSidebarItems } from "@/routes/AdminSidebarItems"
 import { Link } from "react-router"
+import { useUserInfoQuery } from "@/redux/features/auth/authApi"
+import { getSidebarItems } from "@/utils/getSidebarItems"
 
-// This is sample data.
-const data = {
-  versions: ["1.0.1", "1.1.0-alpha", "2.0.0-beta1"],
-  navMain: adminSidebarItems
-}
+
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { data: userData } = useUserInfoQuery(undefined)
+  // This is sample data.
+  const data = {
+    navMain: getSidebarItems(userData?.role)
+  }
+  console.log(userData)
   return (
     <Sidebar {...props}>
       <SidebarHeader>
-       
+
       </SidebarHeader>
       <SidebarContent>
         {/* We create a SidebarGroup for each parent. */}
