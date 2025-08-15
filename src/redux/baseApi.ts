@@ -9,5 +9,5 @@ export const baseApi = createApi({
   endpoints: () => ({
     
   }),
-  tagTypes:["TOUR"]
+  tagTypes:["TOUR","DIVISION"]
 })
